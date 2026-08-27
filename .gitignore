@@ -1,0 +1,7 @@
+# Caches / build junk
+**/icon-theme.cache
+**/*.qmlc
+**/build/
+**/build-restore/
+*.so.old
+.DS_Store

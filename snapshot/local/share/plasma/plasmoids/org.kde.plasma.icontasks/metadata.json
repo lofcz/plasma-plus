@@ -1,0 +1,25 @@
+{
+    "KPackageStructure": "Plasma/Applet",
+    "KPlugin": {
+        "Authors": [
+            {
+                "Name": "Eike Hein"
+            },
+            {
+                "Name": "Jeysef"
+            }
+        ],
+        "Category": "Windows and Tasks",
+        "Description": "Icons-only task manager with uniform icon size",
+        "Icon": "preferences-system-windows",
+        "Id": "org.kde.plasma.icontasks",
+        "License": "GPL-2.0-or-later",
+        "Name": "Icons-only Task Manager",
+        "Version": "1.0.1",
+        "Website": "https://kde.org"
+    },
+    "X-Plasma-API-Minimum-Version": "6.0",
+    "X-Plasma-Provides": [
+        "org.kde.plasma.multitasking"
+    ]
+}

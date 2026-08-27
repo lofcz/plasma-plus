@@ -1,0 +1,34 @@
+# Generated at snapshot time — do not edit by hand for restore logic
+
+date_utc=2026-08-27T20:02:26Z
+host=lof
+user=lofcz
+os=CachyOS (Arch)
+plasma_hint=Plasma 6.7.4 (plasma-workspace 6.7.4-3.1)
+scale=1.25
+look_and_feel=org.kde.windowsmodern.dark
+plasma_theme=Windows-modern-dark
+icons=windows-modern (runtime) / Win11 (kdedefaults)
+cursor=Windows11Light
+widget_style=kvantum-dark
+decoration=aurorae windows-modern-dark-aurorae
+border_size=None
+
+included:
+  plasmoids: org.kde.windowsmodern.{startmenu,showdesktop,digitalclock}, org.kde.plasma.icontasks
+  look-and-feel: org.kde.windowsmodern.{dark,light}
+  desktoptheme: Windows-modern-{dark,light}
+  aurorae: windows-modern-{dark,light}-aurorae
+  colors: WindowsModern{Dark,Light}, FluentDark
+  kvantum: Windows-modern
+  icons: windows-modern, Win11, Windows11{Light,Dark}, Win10OS-cursors, hicolor overlays
+  fonts: segoe-ui
+  wallpaper: Windows-modern
+  plugin: ~/.local/lib/qt6/plugins/plasma/applets/org.kde.plasma.icontasks.so
+  configs: plasma-org.kde.plasma.desktop-appletsrc, plasmashellrc, kwinrc, kdeglobals, kdedefaults
+
+excluded:
+  Fluent-round themes / look-and-feel
+  Full KDE-Windows-Modern git tree (installed files only)
+  VPN / Flameshot / unrelated app configs
+  icon-theme.cache (regenerated on restore)

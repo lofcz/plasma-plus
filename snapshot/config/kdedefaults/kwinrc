@@ -1,0 +1,12 @@
+[TabBox]
+LayoutName=org.kde.breeze.desktop
+
+[Windows]
+BorderlessMaximizedWindows=false
+
+[org.kde.kdecoration2]
+ButtonsOnLeft=ML
+ButtonsOnRight=IAX
+NoPlugin=false
+library=org.kde.kwin.aurorae
+theme=__aurorae__svg__windows-modern-dark-aurorae
