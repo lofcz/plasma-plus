@@ -5,3 +5,4 @@
 **/build-restore/
 *.so.old
 .DS_Store
+windows-modern/.git

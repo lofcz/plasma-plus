@@ -1,0 +1,17 @@
+{
+    "KPackageStructure": "KWin/Script",
+    "KPlugin": {
+        "Authors": [
+            {
+                "Name": "local"
+            }
+        ],
+        "Description": "Taskbar click raises all windows of an app; click again minimizes them",
+        "Icon": "preferences-system-windows-actions",
+        "Id": "raise-app-windows",
+        "License": "MIT",
+        "Name": "Raise All App Windows"
+    },
+    "X-Plasma-API": "javascript",
+    "X-Plasma-MainScript": "code/main.js"
+}

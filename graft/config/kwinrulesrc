@@ -1,0 +1,30 @@
+[General]
+count=2
+rules=flameshot-noanim,chromium-focus
+
+[flameshot-noanim]
+Description=Flameshot — no chrome, no rounded corners
+wmclass=flameshot
+wmclasscomplete=false
+wmclassmatch=2
+types=0
+noborder=true
+noborderrule=2
+above=true
+aboverule=2
+skiptaskbar=true
+skiptaskbarrule=2
+skippager=true
+skippagerrule=2
+skipswitcher=true
+skipswitcherrule=2
+strictgeometry=false
+strictgeometryrule=2
+
+[chromium-focus]
+Description=Let Chromium take focus when opening links
+wmclass=chromium
+wmclasscomplete=false
+wmclassmatch=1
+fsplevel=0
+fsplevelrule=2

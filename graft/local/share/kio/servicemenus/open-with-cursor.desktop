@@ -1,0 +1,12 @@
+[Desktop Entry]
+Type=Service
+Name=Open with Cursor
+X-KDE-ServiceTypes=KonqPopupMenu/Plugin
+MimeType=inode/directory;all/all;
+Actions=openWithCursor;
+X-KDE-Priority=TopLevel
+
+[Desktop Action openWithCursor]
+Name=Open with Cursor
+Icon=co.anysphere.cursor
+Exec=__HOME__/.local/share/cursor/cursor %F

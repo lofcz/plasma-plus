@@ -1,0 +1,16 @@
+{
+    "KPackageStructure": "KWin/Script",
+    "KPlugin": {
+        "Authors": [
+            {
+                "Name": "local"
+            }
+        ],
+        "Description": "Force Flameshot overlay to cover the Plasma panel",
+        "Icon": "preferences-system-windows-script-test",
+        "Id": "flameshot-cover-panel",
+        "License": "MIT",
+        "Name": "Flameshot Cover Panel"
+    },
+    "X-Plasma-API": "javascript"
+}

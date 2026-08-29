@@ -1,0 +1,8 @@
+[General]
+ColorScheme=WindowsModernDark
+
+[Icons]
+Theme=windows-modern
+
+[KDE]
+widgetStyle=kvantum-dark

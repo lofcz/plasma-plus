@@ -1,0 +1,11 @@
+[Keyboard]
+NumLock=0
+
+[Libinput][1739][53228][VEN_06CB:00 06CB:CFEC Touchpad]
+ClickMethod=1
+DisableWhileTyping=false
+NaturalScroll=true
+PointerAcceleration=0.000
+PointerAccelerationProfile=2
+ScrollFactor=0.5
+TapDragLock=true
