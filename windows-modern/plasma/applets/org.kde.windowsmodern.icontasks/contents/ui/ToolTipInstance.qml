@@ -359,12 +359,15 @@ Item {
                 anchors.fill: hoverHandler
                 anchors.margins: 0
 
+                // Keep the viewer alive after the popup hides. Destroying it
+                // on close creates an empty PipeWireSourceItem on the next
+                // open and flashes a blank frame in every window.
                 active: Plasmoid.configuration.showToolTips
                     && !toolTipDelegate.isLauncher
                     && !albumArtImage.visible
                     && root.index !== -1
                     && thumbnailSourceItem.isReadyForPainting
-                asynchronous: true
+                asynchronous: false
                 source: "PipeWireThumbnail.qml"
             }
 

@@ -6,12 +6,11 @@
 
 import QtQuick
 import org.kde.pipewire as PipeWire
-import org.kde.taskmanager as TaskManager
 
-PipeWire.PipeWireSourceItem {
-    id: pipeWireSourceItem
+Item {
+    id: root
 
-    readonly property alias hasThumbnail: pipeWireSourceItem.ready
+    readonly property bool hasThumbnail: live.ready || frozen.source !== ""
 
     readonly property string windowUuid: {
         const id = thumbnailSourceItem.winId
@@ -21,55 +20,40 @@ PipeWire.PipeWireSourceItem {
         return String(id)
     }
 
-    readonly property bool canCapture: windowUuid.length > 0
-        && thumbnailSourceItem.isReadyForPainting
-
-    anchors.fill: parent
-    nodeId: waylandItem.nodeId
-
-    TaskManager.ScreencastingRequest {
-        id: waylandItem
-        // Drop the uuid to tear the stream down, then set it again to retry.
-        // KWin rejects Chromium/Wayland requests that arrive before a buffer
-        // is attached; a stale rejected request never recovers on its own.
-        uuid: (canCapture && !retry.paused) ? windowUuid : ""
+    readonly property url frozenUrl: {
+        const _ = tasks.streamBroker.generation
+        return tasks.streamBroker.frozenUrl(windowUuid)
     }
 
-    QtObject {
-        id: retry
-        property bool paused: false
-        property int attempts: 0
+    Image {
+        id: frozen
+        anchors.fill: parent
+        source: root.frozenUrl
+        fillMode: Image.PreserveAspectCrop
+        asynchronous: false
+        cache: false
+        visible: source !== ""
     }
 
-    Timer {
-        id: retryWatchdog
-        interval: 280
-        repeat: false
-        running: canCapture && !pipeWireSourceItem.ready && retry.attempts < 4 && !retry.paused
-        onTriggered: {
-            retry.attempts += 1
-            retry.paused = true
-            retryResume.start()
+    PipeWire.PipeWireSourceItem {
+        id: live
+        anchors.fill: parent
+        visible: ready
+        nodeId: {
+            const _ = tasks.streamBroker.generation
+            return tasks.streamBroker.nodeIdFor(windowUuid)
         }
     }
 
-    Timer {
-        id: retryResume
-        interval: 16
-        repeat: false
-        onTriggered: retry.paused = false
-    }
-
-    onReadyChanged: {
-        if (pipeWireSourceItem.ready) {
-            retry.attempts = 0
+    onWindowUuidChanged: {
+        if (windowUuid.length > 0) {
+            tasks.streamBroker.acquire(windowUuid)
         }
     }
 
-    onCanCaptureChanged: {
-        if (canCapture) {
-            retry.attempts = 0
-            retry.paused = false
+    Component.onCompleted: {
+        if (windowUuid.length > 0) {
+            tasks.streamBroker.acquire(windowUuid)
         }
     }
 }

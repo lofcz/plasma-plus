@@ -249,8 +249,14 @@ function isCursorOnPanel() {
     }
 
     try {
-        if (isPanelWindow(workspace.windowAt(pos))) {
+        var underCursor = workspace.windowAt(pos);
+        if (isPanelWindow(underCursor)) {
             return true;
+        }
+        // Thumbnail flyout / plasma popup: click a preview to raise
+        // that window only, not the whole group.
+        if (underCursor && isShellWindow(underCursor)) {
+            return false;
         }
     } catch (e) {
     }
@@ -387,36 +393,10 @@ function rememberActive(window) {
 }
 
 function handlePanelClick(prev, window) {
-    var others = siblingStats(window);
-    var sameGroup = prev && isAppWindow(prev) && appKey(prev) === appKey(window);
-
-    // Panel popup closed: same visible window is focused again. Do not toggle.
-    if (sawShell && sameWindow(prev, window) && others.minimized === 0 && !isMinimizedSafe(prev)) {
-        rememberActive(window);
-        return;
-    }
-
-    // Desktop / all-minimized: Plasma unminimized one window. Restore the rest.
-    if (sameWindow(prev, window)) {
-        if (others.minimized > 0) {
-            raiseAppWindows(window);
-        } else {
-            rememberActive(window);
-        }
-        return;
-    }
-
-    if (sameGroup) {
-        // Stale lastActive after minimize-all, or the rest of the group is still down.
-        if (isMinimizedSafe(prev) || others.visible === 0) {
-            raiseAppWindows(window);
-        } else {
-            minimizeAppWindows(window);
-        }
-        return;
-    }
-
-    raiseAppWindows(window);
+    // Group raise/minimize-all is no longer done on a single taskbar click.
+    // The taskbar applet shows thumbnails on click and toggles the whole
+    // group on a quick double-click. Only keep MRU tracking here.
+    rememberActive(window);
 }
 
 function onWindowActivated(window) {

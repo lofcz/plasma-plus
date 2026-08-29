@@ -41,6 +41,7 @@ PlasmoidItem {
     readonly property Component pulseAudioComponent: Qt.createComponent("PulseAudio.qml")
 
     property alias taskList: taskList
+    property alias streamBroker: streamBrokerImpl
 
     preferredRepresentation: fullRepresentation
 
@@ -558,6 +559,10 @@ PlasmoidItem {
             return reverseMode;
         }
         return !reverseMode;
+    }
+
+    StreamBroker {
+        id: streamBrokerImpl
     }
 
     Component.onCompleted: {

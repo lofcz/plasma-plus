@@ -65,8 +65,11 @@ Loader {
     LayoutMirroring.enabled: Application.layoutDirection === Qt.RightToLeft
     LayoutMirroring.childrenInherit: true
 
-    active: !blockingUpdates && rootIndex !== undefined && (reordering || (parentTask && parentTask.containsMouse) || Window.visibility !== Window.Hidden)
-    asynchronous: true
+    // Stay loaded after the popup hides so PipeWireThumbnail is not torn
+    // down on every close. Window.Hidden used to unload the whole tree
+    // once the dialog hid, which forced a blank first frame next time.
+    active: !blockingUpdates && rootIndex !== undefined && parentTask
+    asynchronous: false
 
     onActiveChanged: if (!active) {
         reordering = false

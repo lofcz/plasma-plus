@@ -19,6 +19,7 @@ import plasma.applet.org.kde.plasma.icontasks as TaskManagerApplet
 import org.kde.plasma.plasmoid
 
 import org.kde.taskmanager as TaskManager
+import "code/TaskTools.js" as LocalTaskTools
 
 FloatingToolTipArea {
     id: task
@@ -70,6 +71,15 @@ FloatingToolTipArea {
     property bool isWindow: model.IsWindow
     property int childCount: model.ChildCount
     property int previousChildCount: 0
+    readonly property int groupWindowCount: {
+        if (childCount > 1) {
+            return childCount;
+        }
+        const list = model.WinIdList;
+        return list ? list.length : 0;
+    }
+    readonly property bool isCombinedGroup: !inPopup && groupWindowCount > 1
+    clip: false
     property alias labelText: label.text
     property QtObject contextMenu: null
     readonly property bool smartLauncherEnabled: !inPopup
@@ -174,21 +184,7 @@ FloatingToolTipArea {
         }
 
         if (model.IsGroupParent) {
-            switch (Plasmoid.configuration.groupedTaskVisualization) {
-            case 0:
-                break; // Use the default description
-            case 1: {
-                return `${i18nc("@info:usagetip %1 task name", "Show Task tooltip for %1", model.display)}; ${smartLauncherDescription}`;
-            }
-            case 2: {
-                if (effectWatcher.registered) {
-                    return `${i18nc("@info:usagetip %1 task name", "Show windows side by side for %1", model.display)}; ${smartLauncherDescription}`;
-                }
-                // fallthrough
-            }
-            default:
-                return `${i18nc("@info:usagetip %1 task name", "Open textual list of windows for %1", model.display)}; ${smartLauncherDescription}`;
-            }
+            return `${i18nc("@info:usagetip %1 task name", "Show window thumbnails for %1", model.display)}; ${smartLauncherDescription}`;
         }
 
         return `${i18nc("@info:usagetip %1 task name", "Activate %1", model.display)}; ${smartLauncherDescription}`;
@@ -199,7 +195,9 @@ FloatingToolTipArea {
     onToolTipVisibleChanged: toolTipVisible => {
         task.toolTipOpen = toolTipVisible;
         if (!toolTipVisible) {
-            tasksRoot.toolTipOpenedByClick = null;
+            if (!task.containsMouse) {
+                tasksRoot.toolTipOpenedByClick = null;
+            }
         } else {
             tasksRoot.toolTipAreaItem = task;
         }
@@ -209,7 +207,14 @@ FloatingToolTipArea {
         if (containsMouse) {
             task.forceActiveFocus(Qt.MouseFocusReason);
             task.updateMainItemBindings();
-        } else {
+            const list = model.WinIdList;
+            if (list && tasksRoot.streamBroker) {
+                for (let i = 0; i < list.length; i++) {
+                    tasksRoot.streamBroker.acquire(list[i]);
+                }
+            }
+        } else if (!task.toolTipOpen) {
+            // Keep a click-pinned flyout alive while the pointer moves onto it.
             tasksRoot.toolTipOpenedByClick = null;
         }
     }
@@ -276,7 +281,17 @@ FloatingToolTipArea {
     onAudioIndicatorsEnabledChanged: task.hasAudioStreamChanged()
 
     Keys.onMenuPressed: event => contextMenuTimer.start()
-    Keys.onReturnPressed: event => TaskManagerApplet.TaskTools.activateTask(modelIndex(), model, event.modifiers, task, Plasmoid, tasksRoot, effectWatcher.registered)
+    Keys.onReturnPressed: event => {
+        if (event.modifiers & Qt.ShiftModifier) {
+            tasksModel.requestNewInstance(modelIndex());
+            return;
+        }
+        if (task.isCombinedGroup) {
+            task.showGroupThumbnails();
+            return;
+        }
+        TaskManagerApplet.TaskTools.activateTask(modelIndex(), model, event.modifiers, task, Plasmoid, tasksRoot, effectWatcher.registered);
+    }
     Keys.onEnterPressed: event => Keys.returnPressed(event);
     Keys.onSpacePressed: event => Keys.returnPressed(event);
     Keys.onUpPressed: event => Keys.leftPressed(event)
@@ -303,9 +318,28 @@ FloatingToolTipArea {
     }
 
     function showContextMenu(args: var): void {
+        groupDoubleClickTimer.stop();
         task.hideImmediately();
         contextMenu = tasksRoot.createContextMenu(task, modelIndex(), args) as ContextMenu;
         contextMenu.show();
+    }
+
+    function showGroupThumbnails(): void {
+        // Pin instantly. Do not hide/show if hover already has the flyout up.
+        tasksRoot.toolTipOpenedByClick = task;
+        if (task.toolTipOpen) {
+            return;
+        }
+        task.updateMainItemBindings();
+        task.showToolTip();
+    }
+
+    function activateGroupWindows(): void {
+        if (task.active) {
+            task.hideToolTip();
+        }
+        tasksRoot.toolTipOpenedByClick = null;
+        LocalTaskTools.toggleGroupedWindows(modelIndex(), model, task, tasksRoot);
     }
 
     function updateAudioStreams(args: var): void {
@@ -426,12 +460,36 @@ FloatingToolTipArea {
         onTriggered: menuTapHandler.longPressed()
     }
 
+    Timer {
+        id: groupDoubleClickTimer
+        interval: Math.max(200, Qt.styleHints.mouseDoubleClickInterval || 400)
+    }
+
     TapHandler {
         id: leftTapHandler
         acceptedButtons: Qt.LeftButton
         onTapped: (eventPoint, button) => leftClick()
 
         function leftClick(): void {
+            if (point.modifiers & Qt.ShiftModifier) {
+                groupDoubleClickTimer.stop();
+                tasksModel.requestNewInstance(modelIndex());
+                return;
+            }
+
+            // Combined group: click shows thumbnails; quick double-click
+            // keeps raise/minimize-all via the KWin script.
+            if (task.isCombinedGroup) {
+                if (groupDoubleClickTimer.running) {
+                    groupDoubleClickTimer.stop();
+                    task.activateGroupWindows();
+                    return;
+                }
+                groupDoubleClickTimer.restart();
+                task.showGroupThumbnails();
+                return;
+            }
+
             if (task.active) {
                 task.hideToolTip();
             }
@@ -575,6 +633,22 @@ FloatingToolTipArea {
             }
 
             return margin;
+        }
+
+        Kirigami.Icon {
+            id: groupIconBack
+            visible: task.isCombinedGroup
+            anchors.centerIn: parent
+            anchors.horizontalCenterOffset: -4
+            anchors.verticalCenterOffset: -4
+            width: icon.width
+            height: icon.height
+            z: -1
+            opacity: 0.4
+            roundToIconSize: false
+            active: false
+            enabled: true
+            source: task.model.decoration
         }
 
         Kirigami.Icon {

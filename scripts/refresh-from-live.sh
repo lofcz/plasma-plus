@@ -74,11 +74,11 @@ if [ -d "$HOME/.local/src/KDE-Windows-Modern/plasma/applets/org.kde.windowsmoder
   copy "$HOME/.local/src/KDE-Windows-Modern/plasma/applets/org.kde.windowsmodern.icontasks/" \
        "$WM/plasma/applets/org.kde.windowsmodern.icontasks/"
 fi
-# Overlay the live QML override onto the applet package contents when present.
-if [ -d "$HOME/.local/share/plasma/plasmoids/org.kde.plasma.icontasks/contents" ]; then
-  rsync -a "$HOME/.local/share/plasma/plasmoids/org.kde.plasma.icontasks/contents/" \
-           "$WM/plasma/applets/org.kde.windowsmodern.icontasks/contents/"
-  echo "  OK  icontasks QML overlay from live plasmoid"
+# Disk plasmoid QML is often stale: plasmashell loads the compiled .so.
+# Re-apply applet source last so StreamBroker / tooltip fixes win.
+if [ -d "$HOME/.local/src/KDE-Windows-Modern/plasma/applets/org.kde.windowsmodern.icontasks" ]; then
+  copy "$HOME/.local/src/KDE-Windows-Modern/plasma/applets/org.kde.windowsmodern.icontasks/" \
+       "$WM/plasma/applets/org.kde.windowsmodern.icontasks/"
 fi
 
 echo "==> extras that are not part of upstream (graft/)"
@@ -87,6 +87,11 @@ mkdir -p "$GRAFT"
 
 copy "$HOME/.local/share/plasma/plasmoids/org.kde.plasma.icontasks/" \
      "$GRAFT/local/share/plasma/plasmoids/org.kde.plasma.icontasks/"
+if [ -d "$HOME/.local/src/KDE-Windows-Modern/plasma/applets/org.kde.windowsmodern.icontasks/contents" ]; then
+  rsync -a "$HOME/.local/src/KDE-Windows-Modern/plasma/applets/org.kde.windowsmodern.icontasks/contents/" \
+           "$GRAFT/local/share/plasma/plasmoids/org.kde.plasma.icontasks/contents/"
+  echo "  OK  icontasks graft QML from applet source"
+fi
 copy "$HOME/.local/lib/qt6/plugins/plasma/applets/org.kde.plasma.icontasks.so" \
      "$GRAFT/local/lib/qt6/plugins/plasma/applets/org.kde.plasma.icontasks.so"
 copy "$HOME/.local/share/kwin/scripts/raise-app-windows/" \

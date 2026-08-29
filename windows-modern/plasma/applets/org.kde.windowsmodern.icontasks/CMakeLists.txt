@@ -125,6 +125,8 @@ ecm_target_qml_sources(org.kde.plasma.icontasks
         ${CMAKE_CURRENT_SOURCE_DIR}/contents/ui/main.qml
         ${CMAKE_CURRENT_SOURCE_DIR}/contents/ui/MouseHandler.qml
         ${CMAKE_CURRENT_SOURCE_DIR}/contents/ui/PipeWireThumbnail.qml
+        ${CMAKE_CURRENT_SOURCE_DIR}/contents/ui/StreamBroker.qml
+        ${CMAKE_CURRENT_SOURCE_DIR}/contents/ui/StreamSlot.qml
         ${CMAKE_CURRENT_SOURCE_DIR}/contents/ui/PlayerController.qml
         ${CMAKE_CURRENT_SOURCE_DIR}/contents/ui/PulseAudio.qml
         ${CMAKE_CURRENT_SOURCE_DIR}/contents/ui/ScrollableTextWrapper.qml
