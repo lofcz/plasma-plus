@@ -1,6 +1,8 @@
 # plasma-plus
 
-Versioned **Windows Modern** Plasma 6 desktop plus every local graft (taskbar, Start, calendar, KWin scripts, configs).
+Plasma 6 based desktop.
+
+<img width="3070" height="1918" alt="image" src="https://github.com/user-attachments/assets/271bdb58-7431-4141-9110-f579bf3e98e1" />
 
 ## Layout
 
