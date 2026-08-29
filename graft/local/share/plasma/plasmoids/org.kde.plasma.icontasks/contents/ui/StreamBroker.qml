@@ -7,17 +7,16 @@ import QtQuick
 Item {
     id: broker
 
-    readonly property int maxStreams: 8
+    readonly property int maxStreams: 12
     property int generation: 0
 
-    // Off-screen but actually rendered so the live texture exists
-    // before the tooltip opens (avoids a blank first frame).
     x: -20000
     y: 0
     width: 420
     height: 260 * maxStreams
     visible: true
-    clip: true
+    clip: false
+    enabled: false
 
     function bump(): void {
         generation += 1;
@@ -120,5 +119,22 @@ Item {
         const id = (uuid === undefined || uuid === null || uuid === 0) ? "" : String(uuid);
         const slot = slotAt(id);
         return slot ? slot.frozenUrl : "";
+    }
+
+    function snapshot(uuid): void {
+        const id = (uuid === undefined || uuid === null || uuid === 0) ? "" : String(uuid);
+        const slot = slotAt(id);
+        if (slot) {
+            slot.takeSnapshot();
+        }
+    }
+
+    function keepGrab(uuid, result): void {
+        const id = (uuid === undefined || uuid === null || uuid === 0) ? "" : String(uuid);
+        const slot = slotAt(id);
+        if (slot && result && result.url) {
+            slot.frozenGrab = result;
+            broker.bump();
+        }
     }
 }

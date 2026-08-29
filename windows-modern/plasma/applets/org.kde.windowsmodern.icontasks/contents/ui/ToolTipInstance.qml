@@ -366,7 +366,10 @@ Item {
                     && !toolTipDelegate.isLauncher
                     && !albumArtImage.visible
                     && root.index !== -1
-                    && thumbnailSourceItem.isReadyForPainting
+                    && thumbnailSourceItem.winId !== undefined
+                    && thumbnailSourceItem.winId !== null
+                    && thumbnailSourceItem.winId !== ""
+                    && thumbnailSourceItem.winId !== 0
                 asynchronous: false
                 source: "PipeWireThumbnail.qml"
             }

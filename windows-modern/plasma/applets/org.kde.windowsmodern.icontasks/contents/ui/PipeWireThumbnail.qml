@@ -25,6 +25,14 @@ Item {
         return tasks.streamBroker.frozenUrl(windowUuid)
     }
 
+    function warm(): void {
+        if (windowUuid.length === 0 || !tasks.streamBroker) {
+            return;
+        }
+        tasks.streamBroker.acquire(windowUuid);
+        tasks.streamBroker.snapshot(windowUuid);
+    }
+
     Image {
         id: frozen
         anchors.fill: parent
@@ -45,15 +53,41 @@ Item {
         }
     }
 
-    onWindowUuidChanged: {
-        if (windowUuid.length > 0) {
-            tasks.streamBroker.acquire(windowUuid)
+    function rememberFrame(): void {
+        if (!live.ready || windowUuid.length === 0) {
+            return;
+        }
+        root.grabToImage(result => {
+            if (result) {
+                tasks.streamBroker.keepGrab(windowUuid, result);
+            }
+        });
+    }
+
+    onWindowUuidChanged: root.warm()
+    onVisibleChanged: if (visible) root.warm()
+    Component.onCompleted: root.warm()
+
+    Connections {
+        target: live
+        function onReadyChanged(): void {
+            if (live.ready) {
+                rememberVisible.restart();
+            }
         }
     }
 
-    Component.onCompleted: {
-        if (windowUuid.length > 0) {
-            tasks.streamBroker.acquire(windowUuid)
-        }
+    Timer {
+        id: rememberVisible
+        interval: 50
+        repeat: false
+        onTriggered: root.rememberFrame()
+    }
+
+    Timer {
+        interval: 700
+        running: root.visible && live.ready
+        repeat: true
+        onTriggered: root.rememberFrame()
     }
 }

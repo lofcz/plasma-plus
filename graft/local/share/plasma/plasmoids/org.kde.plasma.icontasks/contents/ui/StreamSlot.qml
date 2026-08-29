@@ -15,8 +15,9 @@ Item {
     property real lastUsed: 0
     property bool everReady: false
     property bool replacing: false
-    property url frozenUrl: ""
+    property var frozenGrab: null
 
+    readonly property url frozenUrl: frozenGrab ? frozenGrab.url : ""
     readonly property alias nodeId: waylandItem.nodeId
     readonly property alias ready: keepAlive.ready
     readonly property alias previewItem: keepAlive
@@ -37,6 +38,18 @@ Item {
         resumeReplace.restart();
     }
 
+    function takeSnapshot(): void {
+        if (!keepAlive.ready) {
+            return;
+        }
+        keepAlive.grabToImage(result => {
+            // The URL is only valid while this grab result is kept alive.
+            if (result && result.url) {
+                slot.frozenGrab = result;
+            }
+        }, Qt.size(slot.width, slot.height));
+    }
+
     TaskManager.ScreencastingRequest {
         id: waylandItem
         uuid: (slot.replacing || slot.uuid.length === 0) ? "" : slot.uuid
@@ -53,8 +66,10 @@ Item {
             if (keepAlive.ready) {
                 slot.everReady = true;
                 snapshot.restart();
+                warmer.restart();
                 return;
             }
+            warmer.stop();
             if (slot.everReady && !slot.replacing && slot.uuid.length > 0) {
                 slot.replace();
             }
@@ -70,25 +85,17 @@ Item {
 
     Timer {
         id: snapshot
-        interval: 0
+        interval: 80
         repeat: false
-        property int tries: 0
-        onTriggered: {
-            if (!keepAlive.ready) {
-                return;
-            }
-            slot.grabToImage(result => {
-                if (result && result.url) {
-                    slot.frozenUrl = result.url;
-                    snapshot.tries = 0;
-                    return;
-                }
-                if (snapshot.tries < 4) {
-                    snapshot.tries += 1;
-                    snapshot.interval = 50;
-                    snapshot.restart();
-                }
-            });
-        }
+        onTriggered: slot.takeSnapshot()
+    }
+
+    // Keep a recent still so the tooltip has pixels before the
+    // popup's own PipeWire viewer produces a frame.
+    Timer {
+        id: warmer
+        interval: 750
+        repeat: true
+        onTriggered: slot.takeSnapshot()
     }
 }
