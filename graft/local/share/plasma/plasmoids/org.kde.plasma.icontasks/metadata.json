@@ -1,25 +1,29 @@
 {
-    "KPackageStructure": "Plasma/Applet",
     "KPlugin": {
         "Authors": [
             {
+                "Email": "hein@kde.org",
                 "Name": "Eike Hein"
             },
             {
+                "Email": "jeysef@users.noreply.github.com",
                 "Name": "Jeysef"
             }
         ],
+        "BugReportUrl": "https://github.com/Jeysef/KDE-Windows-Modern/issues",
         "Category": "Windows and Tasks",
-        "Description": "Icons-only task manager with uniform icon size",
+        "Description": "Windows 11-style icons-only task manager",
+        "EnabledByDefault": true,
         "Icon": "preferences-system-windows",
         "Id": "org.kde.plasma.icontasks",
         "License": "GPL-2.0-or-later",
-        "Name": "Icons-only Task Manager",
+        "Name": "Windows Modern Icon Tasks",
         "Version": "1.2.0",
-        "Website": "https://kde.org"
+        "Website": "https://github.com/Jeysef/KDE-Windows-Modern"
     },
     "X-Plasma-API-Minimum-Version": "6.0",
     "X-Plasma-Provides": [
         "org.kde.plasma.multitasking"
-    ]
+    ],
+    "KPackageStructure": "Plasma/Applet"
 }

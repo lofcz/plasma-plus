@@ -11,7 +11,6 @@ blurEnabled=false
 contrastEnabled=false
 flameshot-cover-panelEnabled=false
 kwin4_effect_shapecornersEnabled=true
-raise-app-windowsEnabled=true
 scaleEnabled=false
 screenedgeEnabled=false
 shakecursorEnabled=false

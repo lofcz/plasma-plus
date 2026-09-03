@@ -1,3 +1,0 @@
-# Treat the icon pack as binary-ish: do not produce text diffs.
-# This keeps `git diff` and status operations fast.
-icons/** -diff

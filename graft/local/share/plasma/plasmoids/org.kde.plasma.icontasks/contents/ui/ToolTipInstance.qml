@@ -18,6 +18,7 @@ import org.kde.plasma.plasmoid
 import org.kde.plasma.core as PlasmaCore
 import org.kde.plasma.components as PlasmaComponents3
 import org.kde.plasma.extras as PlasmaExtras
+import org.kde.plasma.private.mpris as Mpris
 import org.kde.kirigami as Kirigami
 import org.kde.kwindowsystem
 
@@ -83,7 +84,16 @@ Item {
         return text;
     }
 
-    readonly property bool titleIncludesTrack: toolTipDelegate.playerData !== null && title.includes(toolTipDelegate.playerData.track)
+    // Chromium keeps a "Stopped" MPRIS player around after any tab played audio,
+    // with no xesam:title and its own logo as mpris:artUrl. An empty track
+    // makes String.includes() match every title, so require a real track and a
+    // live session before album art may replace the window thumbnail.
+    readonly property bool playerHasMedia: toolTipDelegate.playerData !== null
+        && toolTipDelegate.playerData.playbackStatus !== Mpris.PlaybackStatus.Stopped
+    readonly property bool titleIncludesTrack: {
+        const track = toolTipDelegate.playerData?.track ?? "";
+        return playerHasMedia && track.length > 0 && title.includes(track);
+    }
 
     // Tile-wide hover tracker — passive (no button grabbing), so the existing
     // ToolTipWindowMouseArea clicks/hover pass through untouched. Drives the
@@ -339,14 +349,6 @@ Item {
                 && winId !== ""
                 && winId !== 0
 
-            Rectangle {
-                id: thumbnailClip
-                anchors.fill: parent
-                radius: Kirigami.Units.smallSpacing * 2
-                color: "transparent"
-                visible: false
-            }
-
             PlasmaExtras.Highlight {
                 anchors.fill: hoverHandler
                 visible: !root.dragging && ((hoverHandler.item as MouseArea)?.containsMouse ?? false)
@@ -355,22 +357,63 @@ Item {
             }
 
             Loader {
+                id: thumbnailLoader
+                active: !toolTipDelegate.isLauncher
+                    && !albumArtImage.visible
+                    && (Number.isInteger(thumbnailSourceItem.winId) || pipeWireLoader.item
+                    && !(pipeWireLoader.item as PipeWireThumbnail).hasThumbnail)
+                    && root.index !== -1
+                asynchronous: true
+                visible: active
+                anchors.fill: hoverHandler
+                anchors.margins: Kirigami.Units.smallSpacing * 2
+
+                sourceComponent: root.isMinimized || pipeWireLoader.active ? iconItem : x11Thumbnail
+
+                Component {
+                    id: x11Thumbnail
+                    PlasmaCore.WindowThumbnail {
+                        winId: thumbnailSourceItem.winId
+                    }
+                }
+
+                Component {
+                    id: iconItem
+                    Kirigami.Icon {
+                        id: realIconItem
+                        source: toolTipDelegate.icon
+                        animated: false
+                        visible: valid
+                        opacity: pipeWireLoader.active ? 0 : 1
+
+                        SequentialAnimation {
+                            running: true
+                            PauseAnimation {
+                                duration: Kirigami.Units.humanMoment
+                            }
+                            NumberAnimation {
+                                duration: Kirigami.Units.longDuration
+                                easing.type: Easing.OutCubic
+                                property: "opacity"
+                                target: realIconItem
+                                to: 1
+                            }
+                        }
+                    }
+                }
+            }
+
+            Loader {
                 id: pipeWireLoader
                 anchors.fill: hoverHandler
-                anchors.margins: 0
+                anchors.margins: thumbnailLoader.anchors.margins
 
-                // Keep the viewer alive after the popup hides. Destroying it
-                // on close creates an empty PipeWireSourceItem on the next
-                // open and flashes a blank frame in every window.
                 active: Plasmoid.configuration.showToolTips
                     && !toolTipDelegate.isLauncher
                     && !albumArtImage.visible
+                    && KWindowSystem.isPlatformWayland
                     && root.index !== -1
-                    && thumbnailSourceItem.winId !== undefined
-                    && thumbnailSourceItem.winId !== null
-                    && thumbnailSourceItem.winId !== ""
-                    && thumbnailSourceItem.winId !== 0
-                asynchronous: false
+                asynchronous: true
                 source: "PipeWireThumbnail.qml"
             }
 
@@ -403,6 +446,7 @@ Item {
             Image {
                 id: albumArtImage
                 readonly property bool available: (status === Image.Ready || status === Image.Loading)
+                    && root.playerHasMedia
                     && (!(toolTipDelegate.isGroup || backend.applicationCategories(launcherUrl).includes("WebBrowser")) || root.titleIncludesTrack)
 
                 anchors.fill: hoverHandler

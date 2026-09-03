@@ -92,7 +92,7 @@ DialogWidth=810
 groupedTaskVisualization=0
 iconSpacing=0
 indicateAudioStreams=false
-launchers=
+launchers=applications:org.kde.dolphin.desktop,applications:chromium.desktop
 showToolTips=true
 
 [Containments][2][Applets][57]
@@ -129,60 +129,60 @@ popupHeight=444
 popupWidth=440
 wallpaperplugin=org.kde.image
 
-[Containments][2][Applets][7][Applets][110]
+[Containments][2][Applets][7][Applets][215]
 immutability=1
 plugin=org.kde.kdeconnect
 
-[Containments][2][Applets][7][Applets][111]
+[Containments][2][Applets][7][Applets][216]
 immutability=1
 plugin=org.kde.plasma.cameraindicator
 
-[Containments][2][Applets][7][Applets][112]
+[Containments][2][Applets][7][Applets][217]
 immutability=1
 plugin=org.kde.plasma.manage-inputmethod
 
-[Containments][2][Applets][7][Applets][113]
+[Containments][2][Applets][7][Applets][218]
 immutability=1
 plugin=org.kde.plasma.notifications
 
-[Containments][2][Applets][7][Applets][114]
+[Containments][2][Applets][7][Applets][219]
 immutability=1
 plugin=org.kde.kscreen
 
-[Containments][2][Applets][7][Applets][115]
+[Containments][2][Applets][7][Applets][220]
 immutability=1
 plugin=org.kde.plasma.keyboardlayout
 
-[Containments][2][Applets][7][Applets][116]
+[Containments][2][Applets][7][Applets][221]
 immutability=1
 plugin=org.kde.plasma.networkmanagement
 
-[Containments][2][Applets][7][Applets][117]
+[Containments][2][Applets][7][Applets][222]
 immutability=1
 plugin=org.kde.plasma.volume
 
-[Containments][2][Applets][7][Applets][117][Configuration][General]
+[Containments][2][Applets][7][Applets][222][Configuration][General]
 migrated=true
 
-[Containments][2][Applets][7][Applets][118]
+[Containments][2][Applets][7][Applets][223]
 immutability=1
 plugin=org.kde.plasma.clipboard
 
-[Containments][2][Applets][7][Applets][119]
+[Containments][2][Applets][7][Applets][224]
 immutability=1
 plugin=org.kde.plasma.devicenotifier
 
-[Containments][2][Applets][7][Applets][120]
+[Containments][2][Applets][7][Applets][225]
 immutability=1
 plugin=org.kde.plasma.brightness
 
-[Containments][2][Applets][7][Applets][121]
-immutability=1
-plugin=org.kde.plasma.bluetooth
-
-[Containments][2][Applets][7][Applets][42]
+[Containments][2][Applets][7][Applets][226]
 immutability=1
 plugin=org.kde.plasma.mediacontroller
+
+[Containments][2][Applets][7][Applets][227]
+immutability=1
+plugin=org.kde.plasma.bluetooth
 
 [Containments][2][Applets][7][ConfigDialog]
 DialogHeight=632
@@ -190,7 +190,7 @@ DialogWidth=812
 
 [Containments][2][Applets][7][General]
 extraItems=org.kde.kdeconnect,org.kde.plasma.cameraindicator,org.kde.plasma.manage-inputmethod,org.kde.plasma.mediacontroller,org.kde.plasma.notifications,org.kde.kscreen,org.kde.plasma.keyboardlayout,org.kde.plasma.networkmanagement,org.kde.plasma.volume,org.kde.plasma.clipboard,org.kde.plasma.bluetooth,org.kde.plasma.brightness,org.kde.plasma.devicenotifier
-hiddenItems=org.kde.plasma.clipboard,org.kde.plasma.bluetooth,org.kde.plasma.battery,org.kde.plasma.brightness,org.kde.plasma.devicenotifier,discord_status_icon_1,chrome_status_icon_1@cursor,spotify-client
+hiddenItems=org.kde.plasma.clipboard,org.kde.plasma.bluetooth,org.kde.plasma.brightness,org.kde.plasma.devicenotifier,discord_status_icon_1,chrome_status_icon_1@cursor,spotify-client,org.kde.plasma.battery
 knownItems=org.kde.kdeconnect,org.kde.plasma.bluetooth,org.kde.plasma.cameraindicator,org.kde.plasma.clipboard,org.kde.plasma.devicenotifier,org.kde.plasma.manage-inputmethod,org.kde.plasma.mediacontroller,org.kde.plasma.notifications,org.kde.plasma.keyboardindicator,org.kde.plasma.weather,org.kde.kscreen,org.kde.plasma.battery,org.kde.plasma.brightness,org.kde.plasma.keyboardlayout,org.kde.plasma.networkmanagement,org.kde.plasma.volume
 shownItems=\\0
 

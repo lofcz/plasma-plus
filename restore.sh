@@ -16,6 +16,11 @@ echo "    to:   $HOME_DIR"
 
 need rsync
 need kwriteconfig6
+if [ ! -x "$WM/install.sh" ]; then
+  echo "==> initialising windows-modern submodule"
+  need git
+  git -C "$ROOT" submodule update --init windows-modern
+fi
 [ -x "$WM/install.sh" ] || die "missing $WM/install.sh"
 [ -d "$GRAFT" ] || die "missing $GRAFT"
 

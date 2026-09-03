@@ -192,6 +192,8 @@ FloatingToolTipArea {
     Accessible.role: Accessible.Button
     Accessible.onPressAction: leftTapHandler.leftClick()
 
+    onAboutToShow: task.toolTipOpen = true
+
     onToolTipVisibleChanged: toolTipVisible => {
         task.toolTipOpen = toolTipVisible;
         if (!toolTipVisible) {
@@ -203,24 +205,10 @@ FloatingToolTipArea {
         }
     }
 
-    function prefetchThumbnails(): void {
-        if (task.inPopup || !model.IsWindow || !tasksRoot.streamBroker) {
-            return;
-        }
-        const list = model.WinIdList;
-        if (!list) {
-            return;
-        }
-        for (let i = 0; i < list.length; i++) {
-            tasksRoot.streamBroker.acquire(list[i]);
-        }
-    }
-
     onContainsMouseChanged: {
         if (containsMouse) {
             task.forceActiveFocus(Qt.MouseFocusReason);
             task.updateMainItemBindings();
-            task.prefetchThumbnails();
         } else if (!task.toolTipOpen) {
             // Keep a click-pinned flyout alive while the pointer moves onto it.
             tasksRoot.toolTipOpenedByClick = null;

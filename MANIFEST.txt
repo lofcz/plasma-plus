@@ -15,7 +15,8 @@ color_scheme=FluentDark
 decoration=aurorae windows-modern-dark-aurorae
 
 base:
-  windows-modern/ = KDE-Windows-Modern + live grafted applets/themes/icons
+  windows-modern/ = git submodule https://github.com/lofcz/KDE-Windows-Modern
+                    (fork of upstream with live grafted applets/themes/icons committed)
 
 graft/:
   plasmoid override org.kde.plasma.icontasks + .so
@@ -27,4 +28,4 @@ graft/:
   battery-tray-autohide, open-with-cursor, QT_PLUGIN_PATH
 
 upstream:
-  https://github.com/Jeysef/KDE-Windows-Modern
+  https://github.com/Jeysef/KDE-Windows-Modern  (remote "upstream" inside windows-modern/)

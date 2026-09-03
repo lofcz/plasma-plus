@@ -65,10 +65,7 @@ Loader {
     LayoutMirroring.enabled: Application.layoutDirection === Qt.RightToLeft
     LayoutMirroring.childrenInherit: true
 
-    // Stay loaded after the popup hides so PipeWireThumbnail is not torn
-    // down on every close. Window.Hidden used to unload the whole tree
-    // once the dialog hid, which forced a blank first frame next time.
-    active: !blockingUpdates && rootIndex !== undefined && parentTask
+    active: !blockingUpdates && rootIndex !== undefined && (reordering || (parentTask && parentTask.containsMouse) || (parentTask && parentTask.toolTipOpen) || tasks.toolTipOpenedByClick === parentTask)
     asynchronous: false
 
     onActiveChanged: if (!active) {
@@ -168,9 +165,14 @@ Loader {
 
                 // Required to know whether to display the media player buttons on the first window or not
                 property bool hasTrackInATitle: {
+                    // An empty track (Chromium's idle MPRIS player) would match every title.
+                    const track = toolTipDelegate.playerData?.track ?? ""
+                    if (track.length === 0) {
+                        return false
+                    }
                     var found = false
                     for (var i=0; i<model.items.count && !found; i++) {
-                        found = model.items.get(i).model.display.includes(toolTipDelegate.playerData?.track)
+                        found = model.items.get(i).model.display.includes(track)
                     }
                     return found
                 }

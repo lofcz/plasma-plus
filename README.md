@@ -7,7 +7,8 @@ Plasma 6 based desktop.
 ## Layout
 
 ```
-windows-modern/     full theme (upstream + grafted applets/themes/icons)
+windows-modern/     git submodule → github.com/lofcz/KDE-Windows-Modern (fork of Jeysef/KDE-Windows-Modern
+                    with the patched applets/themes/icons committed in-tree)
 graft/              extras: icontasks override, KWin scripts, configs, fonts, Fluent bits
 scripts/refresh-from-live.sh
 restore.sh
@@ -18,10 +19,12 @@ restore.sh
 ## Restore
 
 ```bash
-git clone git@github.com:lofcz/plasma-plus.git
+git clone --recurse-submodules git@github.com:lofcz/plasma-plus.git
 cd plasma-plus
 ./restore.sh
 ```
+
+(`restore.sh` runs `git submodule update --init` itself if the submodule is missing.)
 
 That runs `windows-modern/install.sh all --dark`, then applies `graft/`.
 
@@ -34,8 +37,14 @@ REBUILD_ICONTASKS=1 ./restore.sh
 ## Refresh
 
 ```bash
-./scripts/refresh-from-live.sh
+./scripts/refresh-from-live.sh      # rsync live edits into windows-modern/ and graft/
+git -C windows-modern commit -a && git -C windows-modern push
+git add windows-modern graft && git commit && git push
 ```
+
+Theme/applet source changes are committed in the submodule (the fork); this repo only
+tracks the submodule pointer plus `graft/`. Icon Tasks is edited in
+`windows-modern/plasma/applets/org.kde.windowsmodern.icontasks` and built with CMake.
 
 ## Grafts
 

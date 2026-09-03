@@ -1,42 +1,33 @@
 #!/usr/bin/env bash
-# Rebuild windows-modern/ from upstream + graft live customizations on top.
+# Graft live customizations into the windows-modern submodule and graft/.
+#
+# windows-modern/ is a git submodule (github.com/lofcz/KDE-Windows-Modern).
+# Installed copies under ~/.local/share are rsynced onto the matching
+# source paths; review and commit inside windows-modern/ afterwards.
 set -euo pipefail
 
 ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
-UPSTREAM="${KDE_WINDOWS_MODERN_SRC:-$HOME/.local/src/KDE-Windows-Modern}"
 WM="$ROOT/windows-modern"
 GRAFT="$ROOT/graft"
 
 die() { echo "error: $*" >&2; exit 1; }
-[ -d "$UPSTREAM" ] || die "missing upstream at $UPSTREAM"
+[ -f "$WM/install.sh" ] || die "submodule not initialised: git submodule update --init"
+
+EXCLUDES=(--exclude 'icon-theme.cache' --exclude '*.qmlc' --exclude '*.bak*'
+          --exclude 'build/' --exclude 'build-restore/')
 
 copy() {
   local src="$1" dest="$2"
   if [ -e "$src" ]; then
     mkdir -p "$(dirname "$dest")"
-    rsync -a --delete --exclude 'icon-theme.cache' --exclude '*.qmlc' --exclude 'build/' --exclude 'build-restore/' "$src" "$dest"
-    echo "  OK  $2"
+    rsync -a --delete "${EXCLUDES[@]}" "$src" "$dest"
+    echo "  OK  ${dest#"$ROOT"/}"
   else
     echo "  MISS $src"
   fi
 }
 
-echo "==> windows-modern from $UPSTREAM"
-rm -rf "$WM"
-mkdir -p "$WM"
-rsync -a \
-  --exclude '.git/' \
-  --exclude 'build/' \
-  --exclude 'build-restore/' \
-  --exclude '**/*.qmlc' \
-  --exclude '**/icon-theme.cache' \
-  "$UPSTREAM/" "$WM/"
-# Drop nested git leftovers
-rm -rf "$WM/.git" "$WM/.gitmodules"
-echo "  OK  windows-modern/ ($(du -sh "$WM" | cut -f1))"
-
-echo "==> graft live Windows Modern installs onto source tree"
-# Installed (edited) files overwrite the matching upstream paths.
+echo "==> graft live Windows Modern installs onto windows-modern/ (submodule)"
 copy "$HOME/.local/share/plasma/plasmoids/org.kde.windowsmodern.startmenu/" \
      "$WM/plasma/applets/org.kde.windowsmodern.startmenu/"
 copy "$HOME/.local/share/plasma/plasmoids/org.kde.windowsmodern.digitalclock/" \
@@ -53,10 +44,11 @@ copy "$HOME/.local/share/plasma/look-and-feel/org.kde.windowsmodern.light/" \
      "$WM/plasma/look-and-feel/org.kde.windowsmodern.light/"
 copy "$HOME/.local/share/plasma/layout-templates/org.kde.windowsmodern.panel/" \
      "$WM/plasma/layout-templates/org.kde.windowsmodern.panel/"
+# Upstream layout is aurorae/<theme>, installed as ~/.local/share/aurorae/themes/<theme>.
 copy "$HOME/.local/share/aurorae/themes/windows-modern-dark-aurorae/" \
-     "$WM/aurorae/themes/windows-modern-dark-aurorae/"
+     "$WM/aurorae/windows-modern-dark-aurorae/"
 copy "$HOME/.local/share/aurorae/themes/windows-modern-light-aurorae/" \
-     "$WM/aurorae/themes/windows-modern-light-aurorae/"
+     "$WM/aurorae/windows-modern-light-aurorae/"
 copy "$HOME/.local/share/icons/windows-modern/" \
      "$WM/icons/windows-modern/"
 copy "$HOME/.local/share/color-schemes/WindowsModernDark.colors" \
@@ -67,29 +59,23 @@ copy "$HOME/.config/Kvantum/Windows-modern/" \
      "$WM/Kvantum/Windows-modern/"
 copy "$HOME/.local/share/wallpapers/Windows-modern/" \
      "$WM/wallpaper/Windows-modern/"
-
-# Patched Icon Tasks QML lives as a plasmashell override (org.kde.plasma.icontasks).
-# Also keep the C++ applet source in sync (skip build trees).
-if [ -d "$HOME/.local/src/KDE-Windows-Modern/plasma/applets/org.kde.windowsmodern.icontasks" ]; then
-  copy "$HOME/.local/src/KDE-Windows-Modern/plasma/applets/org.kde.windowsmodern.icontasks/" \
-       "$WM/plasma/applets/org.kde.windowsmodern.icontasks/"
-fi
-# Disk plasmoid QML is often stale: plasmashell loads the compiled .so.
-# Re-apply applet source last so StreamBroker / tooltip fixes win.
-if [ -d "$HOME/.local/src/KDE-Windows-Modern/plasma/applets/org.kde.windowsmodern.icontasks" ]; then
-  copy "$HOME/.local/src/KDE-Windows-Modern/plasma/applets/org.kde.windowsmodern.icontasks/" \
-       "$WM/plasma/applets/org.kde.windowsmodern.icontasks/"
-fi
+# Icon Tasks (org.kde.plasma.icontasks) is edited directly in the submodule
+# source tree and compiled into the .so; nothing to graft for it here.
 
 echo "==> extras that are not part of upstream (graft/)"
 rm -rf "$GRAFT"
 mkdir -p "$GRAFT"
 
+# QML mirror of the applet source (plasmashell loads the compiled .so; the
+# on-disk plasmoid is kept for tooling/inspection).
 copy "$HOME/.local/share/plasma/plasmoids/org.kde.plasma.icontasks/" \
      "$GRAFT/local/share/plasma/plasmoids/org.kde.plasma.icontasks/"
-if [ -d "$HOME/.local/src/KDE-Windows-Modern/plasma/applets/org.kde.windowsmodern.icontasks/contents" ]; then
-  rsync -a "$HOME/.local/src/KDE-Windows-Modern/plasma/applets/org.kde.windowsmodern.icontasks/contents/" \
+if [ -d "$WM/plasma/applets/org.kde.windowsmodern.icontasks/contents" ]; then
+  mkdir -p "$GRAFT/local/share/plasma/plasmoids/org.kde.plasma.icontasks/contents"
+  rsync -a "$WM/plasma/applets/org.kde.windowsmodern.icontasks/contents/" \
            "$GRAFT/local/share/plasma/plasmoids/org.kde.plasma.icontasks/contents/"
+  cp -a "$WM/plasma/applets/org.kde.windowsmodern.icontasks/metadata.json" \
+        "$GRAFT/local/share/plasma/plasmoids/org.kde.plasma.icontasks/metadata.json"
   echo "  OK  icontasks graft QML from applet source"
 fi
 copy "$HOME/.local/lib/qt6/plugins/plasma/applets/org.kde.plasma.icontasks.so" \
@@ -128,11 +114,12 @@ copy "$HOME/.config/kdedefaults/" "$GRAFT/config/kdedefaults/"
 copy "$HOME/.config/systemd/user/plasma-plasmashell.service.d/override.conf" \
      "$GRAFT/config/systemd/user/plasma-plasmashell.service.d/override.conf"
 
-echo "==> sanitize /home/lofcz → __HOME__ in text configs"
-python3 - <<'PY'
+echo "==> sanitize $HOME → __HOME__ in text configs"
+GRAFT_DIR="$GRAFT" HOME_DIR="$HOME" python3 - <<'PY'
+import os
 from pathlib import Path
-root = Path("/run/media/lofcz/ssd_external/GitHub/plasma-plus/graft")
-home = "/home/lofcz"
+root = Path(os.environ["GRAFT_DIR"])
+home = os.environ["HOME_DIR"]
 skip = {".png", ".jpg", ".jpeg", ".svg", ".so", ".ttf", ".otf", ".ico", ".cache"}
 for p in root.rglob("*"):
     if not p.is_file() or p.suffix.lower() in skip:
@@ -151,8 +138,9 @@ for p in root.rglob("*"):
     print(f"  sanitized {p.relative_to(root)}")
 PY
 
-echo "==> drop old snapshot/ (replaced by windows-modern + graft)"
-rm -rf "$ROOT/snapshot" "$ROOT/sources"
-
-echo "done"
-du -sh "$WM" "$GRAFT" "$ROOT"
+echo
+echo "==> windows-modern/ (submodule) changes to review and commit:"
+git -C "$WM" status --short || true
+echo
+echo "done. Commit inside windows-modern/ and push, then commit the submodule"
+echo "pointer + graft/ here:  git add windows-modern graft && git commit"
